@@ -5,7 +5,7 @@ from collections import namedtuple
 WIDTH = HEIGHT = 600  # 512
 DIMENSION = 50  # dimensions of a chess board are 8x8
 SIZE = HEIGHT // DIMENSION
-n = 3
+n = 6
 Position = namedtuple('Position', ['x', 'y'])
 top, left, space, lines = (20, 20, 100, n)
 
@@ -111,7 +111,7 @@ class Game:
         for i in range(0, len(path) - 1):
             p.draw.line(self.screen, color, self.my_dict[path[i]], self.my_dict[path[i + 1]], 3)
 
-    def map_path(self, path, target):
+    def map_path(self, path):
         new_path = []
         for i in path:
             if i == -1:
@@ -204,3 +204,4 @@ class Item:
         self.image = p.transform.scale(itemPicture, (SIZE + 10, SIZE + 10))
         self.x = x
         self.y = y
+        self.pos = Position(x, y)

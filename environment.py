@@ -2,102 +2,76 @@ from warehouse.game import Game
 from warehouse.game import Vehicle
 from warehouse.game import Item
 import pygame as p
+from itertools import chain
 import queue as q
 
 FPS = 90
 
-MAX = 100
-INF = int(1e9)
-path = []
-dist = []
-graph = []
+
+class Dijkstra:
+
+    def __init__(self, input):
+        self.input = input
+        self.path = []
+
+    def calculate(self):
+        return [self.calculateFromOrigin(i) for i, v in enumerate(self.input)]
+
+    def calculateFromOrigin(self, origin):
+        distance = [-1 for i in range(len(self.input))]
+        path = [-1 for i in range(len(self.input))]  # vector to get the best path
+
+        # Distance from origin to itself is always 0
+        distance.pop(origin)
+        distance.insert(origin, 0)
+        priority = list(range(len(self.input)))
+
+        while True:
+            if len(priority) == 0: break
+            frm = self.getSmallestPossibleVertex(distance, priority)
+            priority.remove(frm)
+            options = self.getOptionList(self.input[frm])
+            for [position, weight] in options:
+                dist = distance[frm] + weight
+                if distance[position] == -1 or dist < distance[position]:
+                    distance.pop(position)
+                    distance.insert(position, dist)
+                    path.pop(position)
+                    path.insert(position, frm)
+
+        self.path.insert(origin, path)
+        return distance
+
+    def getSmallestPossibleVertex(self, distances, priority):
+        smallestKey = -1
+        smallestValue = -1
+        for i, item in enumerate(distances):
+            if (smallestValue == -1 or (item >= 0 and item < smallestValue)) and i in priority:
+                smallestValue = item
+                smallestKey = i
+        return smallestKey
+
+    def getOptionList(self, vector):
+        return [[i, weight] for i, weight in enumerate(vector) if weight > 0]
+
+    def getPath(self):
+        return self.path
+
+    def getBestPath(self, frm, to):
+        return [i for i in reversed(self._getBestPath(frm, to, [to]))]
+
+    def _getBestPath(self, frm, to, path):
+        path_ = self.path[frm]
+        lastNode = path_[to]
+        path.append(lastNode)
+        if (lastNode == frm):
+            return path
+        else:
+            return self._getBestPath(frm, lastNode, path)
 
 
-class Node:
-    def __init__(self, id, dist, name):
-        self.dist = dist
-        self.id = id
-        self.name = name
-
-    def __lt__(self, other):
-        return self.dist <= other.dist
-
-
-def dijkstra(s):
-    pq = q.PriorityQueue()
-    pq.put(Node(s, 0, "init"))
-    dist[s] = 0
-    while not pq.empty():
-        top = pq.get()
-        u = top.id
-        w = top.dist
-        for neighbor in graph[u]:
-            if w + neighbor.dist < dist[neighbor.id]:
-                dist[neighbor.id] = w + neighbor.dist
-                pq.put(Node(neighbor.id, dist[neighbor.id], neighbor.name))
-                path[neighbor.id] = u
-
-
-def get_path(int_to_node):
-    newdict = {}
-    for i in range(0, len(int_to_node)):
-        newdict.update({int_to_node[i]: dist[i]})
-
-    # finaldict = dict(sorted(newdict.items(), key=lambda item: item[1]))
-    finaldict = newdict
-    print(finaldict)
-
-    mypath = []
-    for key in finaldict.keys():
-        mypath.append(key)
-
-    return mypath
-
-
-def _getBestPath(frm, to, th):
-    print(th)
-    path_ = th[frm]
-    lastNode = path_[to]
-    th.append(lastNode)
-    if lastNode == frm:
-        return th
-    else:
-        return _getBestPath(frm, lastNode, th)
-
-def getBestPath(frm, to):
-    return [i for i in reversed(_getBestPath(frm, to, [to]))]
-
-def warm_up(game, matrix, s):
-    n = len(matrix[0])
-    global graph
-    global dist
-    global path
-
-    graph = [[] for i in range(n + 5)]
-    dist = [INF for i in range(n + 5)]
-    path = [-1 for i in range(n + 5)]
-
-    for i in range(0, n):
-        for j in range(0, n):
-            if matrix[i][j] > 0:
-                name = str(i) + str(j)
-                graph[i].append(Node(j, matrix[i][j], name))
-
-    dijkstra(s)
-
-    mypath = get_path(game.list_node)
-    print("path")
-    print(path)
-    # from point to point
-    getBestPath(0, 5)
-    # print(testPath)
-
-    # target = "21"
-    # newpath1 = game.map_path(path, target)
-    # print(newpath1)
-
-    return mypath
-
+targetNode = 0
+sourceNode = 0
 
 if __name__ == "__main__":
     game = Game()
@@ -111,7 +85,17 @@ if __name__ == "__main__":
     # shortest_path = ["10", "11", "12", "02"]  # test
     # shortest_path = dijkstra (adjacency_matrix)
     # dijkstra(adjacency_matrix)
-    shortest_path = warm_up(game, game.adjacency_matrix, 0)
+    # shortest_path = warm_up(game, game.adjacency_matrix, 0)
+
+    dj = Dijkstra(game.adjacency_matrix)
+    dj.calculate()
+    print(dj.path)
+    # path = dj.getBestPath(0, targetNode)
+    # newpath = game.map_path(path)
+    # shortest_path = newpath
+    path = []
+    newpath = []
+    shortest_path = []
 
     flag_path = False
     temp_path = []
@@ -119,6 +103,7 @@ if __name__ == "__main__":
     hasItem = False
     col = 0
     row = 0
+    item1 = 0
 
     while game.running == 1:
         for event in p.event.get():
@@ -129,12 +114,39 @@ if __name__ == "__main__":
                 col = location[0] - 10
                 row = location[1] - 10
 
+                item1 = Item(location[0] - 10, location[1] - 10)
+                print(item1.pos)
+
+                # set target node
+                index = 0
+                posNearValue = 0
+                for value in game.my_dict.values():
+                    # sure bug here
+                    if 0 <= abs(location[0] - value.x) <= 30 and \
+                            0 <= abs(location[1] - value.y) <= 30:
+                        targetNode = index
+                    index = index + 1
+                print(targetNode)
                 hasItem = True
 
         key = p.key.get_pressed()
 
         if key[p.K_0]:
             flag_path = True
+            ind = 0
+            sourceNode = 0
+            for value in game.my_dict.values():
+                # sure bug here
+                if 0 <= abs(vehicle1.x - value.x) <= 30 and \
+                        0 <= abs(vehicle1.y - value.y) <= 30:
+                    sourceNode = ind
+                ind = ind + 1
+            print(sourceNode)
+
+            path = dj.getBestPath(sourceNode, targetNode)
+            newpath = game.map_path(path)
+            shortest_path = newpath
+
             temp_path = shortest_path
             # color_shortest_path(screen, shortest_path)
         if flag_path:
@@ -148,6 +160,6 @@ if __name__ == "__main__":
         game.draw_board()
         game.load_vehicles(vehicle1)
         if hasItem:
-            game.load_item(Item(col, row))
+            game.load_item(item1)
 
         game.tick(FPS)
