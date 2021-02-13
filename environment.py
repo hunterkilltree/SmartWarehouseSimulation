@@ -2,8 +2,102 @@ from warehouse.game import Game
 from warehouse.game import Vehicle
 from warehouse.game import Item
 import pygame as p
+import queue as q
 
 FPS = 90
+
+MAX = 100
+INF = int(1e9)
+path = []
+dist = []
+graph = []
+
+
+class Node:
+    def __init__(self, id, dist, name):
+        self.dist = dist
+        self.id = id
+        self.name = name
+
+    def __lt__(self, other):
+        return self.dist <= other.dist
+
+
+def dijkstra(s):
+    pq = q.PriorityQueue()
+    pq.put(Node(s, 0, "init"))
+    dist[s] = 0
+    while not pq.empty():
+        top = pq.get()
+        u = top.id
+        w = top.dist
+        for neighbor in graph[u]:
+            if w + neighbor.dist < dist[neighbor.id]:
+                dist[neighbor.id] = w + neighbor.dist
+                pq.put(Node(neighbor.id, dist[neighbor.id], neighbor.name))
+                path[neighbor.id] = u
+
+
+def get_path(int_to_node):
+    newdict = {}
+    for i in range(0, len(int_to_node)):
+        newdict.update({int_to_node[i]: dist[i]})
+
+    # finaldict = dict(sorted(newdict.items(), key=lambda item: item[1]))
+    finaldict = newdict
+    print(finaldict)
+
+    mypath = []
+    for key in finaldict.keys():
+        mypath.append(key)
+
+    return mypath
+
+
+def _getBestPath(frm, to, th):
+    print(th)
+    path_ = th[frm]
+    lastNode = path_[to]
+    th.append(lastNode)
+    if lastNode == frm:
+        return th
+    else:
+        return _getBestPath(frm, lastNode, th)
+
+def getBestPath(frm, to):
+    return [i for i in reversed(_getBestPath(frm, to, [to]))]
+
+def warm_up(game, matrix, s):
+    n = len(matrix[0])
+    global graph
+    global dist
+    global path
+
+    graph = [[] for i in range(n + 5)]
+    dist = [INF for i in range(n + 5)]
+    path = [-1 for i in range(n + 5)]
+
+    for i in range(0, n):
+        for j in range(0, n):
+            if matrix[i][j] > 0:
+                name = str(i) + str(j)
+                graph[i].append(Node(j, matrix[i][j], name))
+
+    dijkstra(s)
+
+    mypath = get_path(game.list_node)
+    print("path")
+    print(path)
+    # from point to point
+    getBestPath(0, 5)
+    # print(testPath)
+
+    # target = "21"
+    # newpath1 = game.map_path(path, target)
+    # print(newpath1)
+
+    return mypath
+
 
 if __name__ == "__main__":
     game = Game()
@@ -14,8 +108,11 @@ if __name__ == "__main__":
     vehicle1 = Vehicle(init_pos_x, init_pos_y)
     game.load_vehicles(vehicle1)
 
-    shortest_path = ["10", "11", "12", "02"]  # test
+    # shortest_path = ["10", "11", "12", "02"]  # test
     # shortest_path = dijkstra (adjacency_matrix)
+    # dijkstra(adjacency_matrix)
+    shortest_path = warm_up(game, game.adjacency_matrix, 0)
+
     flag_path = False
     temp_path = []
 
@@ -33,7 +130,6 @@ if __name__ == "__main__":
                 row = location[1] - 10
 
                 hasItem = True
-
 
         key = p.key.get_pressed()
 

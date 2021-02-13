@@ -5,7 +5,7 @@ from collections import namedtuple
 WIDTH = HEIGHT = 600  # 512
 DIMENSION = 50  # dimensions of a chess board are 8x8
 SIZE = HEIGHT // DIMENSION
-n = 2
+n = 3
 Position = namedtuple('Position', ['x', 'y'])
 top, left, space, lines = (20, 20, 100, n)
 
@@ -27,6 +27,7 @@ itemPicture = p.image.load("image/Robot1.png")
 #  [0, 0, 0, 0, 0, 5, 0, 7, 0]
 #  ]
 
+# 4 nodes
 # [
 # [0, 3, 10, 0], # tat ca lien quan den 00
 #  [10, 0, 0, 4], # tat ca lien quan den 01
@@ -63,8 +64,18 @@ class Game:
                 temp = {coordinate: self.points[r][c]}
                 self.my_dict.update(temp)
         #  Adjacency Matrix 6x6
-        self.adjacency_matrix = [
-        ]
+        # self.adjacency_matrix = [
+        #      [0, 3, 10, 0], # tat ca lien quan den 00
+        #      [10, 0, 0, 4], # tat ca lien quan den 01
+        #      [9, 0, 0, 7], # tat ca lien quan den 10
+        #      [0, 3, 5, 0] # tat ca lien quan den 11
+        # ]
+        self.adjacency_matrix = []
+        self.list_node = []
+
+        for key in self.my_dict.keys():
+            self.list_node.append(key)
+        print(self.list_node)
 
         for r in self.my_dict:
             matrix = []
@@ -74,7 +85,7 @@ class Game:
                         (abs(int(r[0]) - int(c[0])) == 1 or abs(int(r[1]) - int(c[1])) == 1)):
                     r1 = random.randint(2, 10)
                     matrix.append(r1)
-                    print(r + " " + c)
+                    # print(r + " " + c)
                 else:
                     matrix.append(0)
             self.adjacency_matrix.append(matrix)
@@ -99,6 +110,15 @@ class Game:
         color = p.Color("red")
         for i in range(0, len(path) - 1):
             p.draw.line(self.screen, color, self.my_dict[path[i]], self.my_dict[path[i + 1]], 3)
+
+    def map_path(self, path, target):
+        new_path = []
+        for i in path:
+            if i == -1:
+                new_path.append("None")
+            else:
+                new_path.append(self.list_node[i])
+        return new_path
 
     # draw grid map
     def draw_board(self):
