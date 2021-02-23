@@ -2,10 +2,11 @@ import pygame as p
 import random
 from collections import namedtuple
 
-WIDTH = HEIGHT = 600  # 512
+
+WIDTH = HEIGHT = 530  # 512
 DIMENSION = 50  # dimensions of a chess board are 8x8
 SIZE = HEIGHT // DIMENSION
-n = 6
+n = 5
 Position = namedtuple('Position', ['x', 'y'])
 top, left, space, lines = (20, 20, 100, n)
 
@@ -182,21 +183,21 @@ class Vehicle:
         self.speed = 1
 
     def move(self, x, y, path, my_dict):
+        current_node = ""
         if path:
             if (x + 10) == my_dict[path[0]].x and (y + 10) == my_dict[path[0]].y:
+                current_node = path[0]
                 path.pop(0)
-                return x, y, path
-            if (x + 10) < my_dict[path[0]].x:
+            elif (x + 10) < my_dict[path[0]].x:
                 x = x + self.speed
-            if (x + 10) > my_dict[path[0]].x:
+            elif (x + 10) > my_dict[path[0]].x:
                 x = x - self.speed
 
-            if (y + 10) < my_dict[path[0]].y:
+            elif (y + 10) < my_dict[path[0]].y:
                 y = y + self.speed
-            if (y + 10) > my_dict[path[0]].y:
+            elif (y + 10) > my_dict[path[0]].y:
                 y = y - self.speed
-
-        return x, y, path
+        return x, y, path, current_node
 
 
 class Item:

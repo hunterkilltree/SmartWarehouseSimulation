@@ -1,11 +1,12 @@
 from warehouse.game import Game
 from warehouse.game import Vehicle
 from warehouse.game import Item
+from server.firebase import Firebase
 import pygame as p
 from itertools import chain
 import queue as q
 
-FPS = 90
+FPS = 50
 
 
 class Dijkstra:
@@ -75,6 +76,7 @@ sourceNode = 0
 
 if __name__ == "__main__":
     game = Game()
+    firebase = Firebase()
 
     init_pos_x = 30
     init_pos_y = 20
@@ -150,11 +152,15 @@ if __name__ == "__main__":
             temp_path = shortest_path
             # color_shortest_path(screen, shortest_path)
         if flag_path:
-            game.color_shortest_path(temp_path)
-            vehicle1.x, vehicle1.y, temp_path = vehicle1.move(vehicle1.x, vehicle1.y, temp_path, game.my_dict)
-
             if not temp_path:
                 flag_path = False
+            else:
+                game.color_shortest_path(temp_path)
+
+
+                vehicle1.x, vehicle1.y, temp_path, current_node = vehicle1.move(vehicle1.x, vehicle1.y, temp_path, game.my_dict)
+
+                # firebase.update_node_data(current_node)
 
         game.update()
         game.draw_board()
