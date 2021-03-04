@@ -81,8 +81,15 @@ if __name__ == "__main__":
     init_pos_x = 30
     init_pos_y = 20
 
-    vehicle1 = Vehicle(init_pos_x, init_pos_y)
-    game.load_vehicles(vehicle1)
+    numberOfVehicles = 2
+    vehicle1 = []
+    vehicle = Vehicle(init_pos_x, init_pos_y)
+    vehicle1.append(vehicle)
+    vehicle = Vehicle(30, 220)
+    vehicle1.append(vehicle)
+
+    for i in range(0, numberOfVehicles):
+        game.load_vehicles(vehicle1[i])
 
     # shortest_path = ["10", "11", "12", "02"]  # test
     # shortest_path = dijkstra (adjacency_matrix)
@@ -139,8 +146,8 @@ if __name__ == "__main__":
             sourceNode = 0
             for value in game.my_dict.values():
                 # sure bug here
-                if 0 <= abs(vehicle1.x - value.x) <= 30 and \
-                        0 <= abs(vehicle1.y - value.y) <= 30:
+                if 0 <= abs(vehicle1[0].x - value.x) <= 30 and \
+                        0 <= abs(vehicle1[0].y - value.y) <= 30:
                     sourceNode = ind
                 ind = ind + 1
             print(sourceNode)
@@ -158,13 +165,14 @@ if __name__ == "__main__":
                 game.color_shortest_path(temp_path)
 
 
-                vehicle1.x, vehicle1.y, temp_path, current_node = vehicle1.move(vehicle1.x, vehicle1.y, temp_path, game.my_dict)
+                vehicle1[0].x, vehicle1[0].y, temp_path, current_node = vehicle1[0].move(vehicle1[0].x, vehicle1[0].y, temp_path, game.my_dict)
 
-                # firebase.update_node_data(current_node)
+                firebase.update_node_data(current_node)
 
         game.update()
         game.draw_board()
-        game.load_vehicles(vehicle1)
+        game.load_vehicles(vehicle1[0])
+        game.load_vehicles(vehicle1[1])
         if hasItem:
             game.load_item(item1)
 

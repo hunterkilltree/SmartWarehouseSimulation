@@ -92,6 +92,7 @@ class Game:
             self.adjacency_matrix.append(matrix)
 
         print(self.adjacency_matrix)
+        print(self.my_dict)
 
     def update(self):
         p.display.flip()
