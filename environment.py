@@ -20,7 +20,7 @@ if __name__ == "__main__":
     init_pos_x = 30
     init_pos_y = 20
 
-    numberOfVehicles = 3
+    numberOfVehicles = 2
     vehicle1 = []
     # vehicle = Vehicle(init_pos_x, init_pos_y)
     # vehicle1.append(vehicle)
@@ -31,8 +31,8 @@ if __name__ == "__main__":
     vehicle1.append(vehicle)
     vehicle = Vehicle("02", game.my_dict)
     vehicle1.append(vehicle)
-    vehicle = Vehicle("03", game.my_dict)
-    vehicle1.append(vehicle)
+    # vehicle = Vehicle("03", game.my_dict)
+    # vehicle1.append(vehicle)
     #########################################
 
     # load multiple robot based on the give position
@@ -120,7 +120,7 @@ if __name__ == "__main__":
                     game.color_shortest_path(temp_path[i])
 
                     # moving robot in grid
-                    vehicle1[i].x, vehicle1[i].y, temp_path[i], current_node = vehicle1[i].move(vehicle1[i].x, vehicle1[i].y, temp_path[i], game.my_dict)
+                    # vehicle1[i].x, vehicle1[i].y, temp_path[i], current_node = vehicle1[i].move(vehicle1[i].x, vehicle1[i].y, temp_path[i], game.my_dict)
 
                 # firebase.update_node_data(current_node)
 
