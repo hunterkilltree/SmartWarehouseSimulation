@@ -92,6 +92,7 @@ class Game:
             self.adjacency_matrix.append(matrix)
 
         print(self.adjacency_matrix)
+        print("Coordinate : Position")
         print(self.my_dict)
 
     def update(self):
@@ -113,6 +114,7 @@ class Game:
         for i in range(0, len(path) - 1):
             p.draw.line(self.screen, color, self.my_dict[path[i]], self.my_dict[path[i + 1]], 3)
 
+    # convert from [0, 1, 2] to ['00', '01', '02']
     def map_path(self, path):
         new_path = []
         for i in path:
@@ -157,13 +159,28 @@ class Game:
 
 
 class Vehicle:
-    def __init__(self, init_pos_x, init_pos_y):
+    def __init__(self, position, my_dict):
+        # map coordinate with pixel position
         self.image = p.transform.scale(picture, (SIZE + 10, SIZE + 10))  # scale the given image fit the grid
-        self.x = init_pos_x - 10
-        self.y = init_pos_y - 10
+        self.x = my_dict[position].x - 10
+        self.y = my_dict[position].y - 10
+
+        self.currentCoorPos = position
+
+        # convert current coordinate position to integer value
+        ind = 0
+        sourceNode = 0
+        for value in my_dict.values():
+            # sure bug here
+            if 0 <= abs(self.x - value.x) <= 30 and \
+                    0 <= abs(self.y - value.y) <= 30:
+                sourceNode = ind
+            ind = ind + 1
+        self.initValue = sourceNode
 
         self.obstacle = False
         self.priority = 0  # 0 > 1 > 2 in multi robot
+
 
         # movement
         self.forward = False
@@ -200,6 +217,10 @@ class Vehicle:
                 y = y - self.speed
         return x, y, path, current_node
 
+    # get position
+    def get_start_pos(self):
+        pass
+
 
 class Item:
     def __init__(self, x, y):
@@ -207,3 +228,7 @@ class Item:
         self.x = x
         self.y = y
         self.pos = Position(x, y)
+
+# class Task:
+#     def __init__(self, item):
+#         self.Ite
