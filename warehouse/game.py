@@ -13,7 +13,7 @@ top, left, space, lines = (20, 20, 100, n)
 programIcon = p.image.load("image/Robot2.ico")
 picture = p.image.load("image/Robot2.png")
 station = p.image.load("image/Station.png")
-itemPicture = p.image.load("image/Robot1.png")
+itemPicture = p.image.load("image/Item.png")
 
 
 # [
@@ -190,7 +190,9 @@ class Game:
 class Vehicle:
     def __init__(self, position, my_dict):
         # map coordinate with pixel position
+
         self.image = p.transform.scale(picture, (SIZE + 10, SIZE + 10))  # scale the given image fit the grid
+        self.my_dict = my_dict
         self.x = my_dict[position].x - 10
         self.y = my_dict[position].y - 10
 
@@ -207,8 +209,11 @@ class Vehicle:
             ind = ind + 1
         self.initValue = sourceNode
 
+        # other value
+        self.hasTask = False
         self.obstacle = False
         self.priority = 0  # 0 > 1 > 2 in multi robot
+        self.hasItem = False
 
 
         # movement
@@ -229,22 +234,39 @@ class Vehicle:
         self.move_y = 0
         self.speed = 1
 
+    def update_vehicle_information(self, pos_x_y):
+        self.x = self.my_dict[pos_x_y].x - 10
+        self.y = self.my_dict[pos_x_y].y - 10
+
+        self.currentCoorPos = pos_x_y
+
+        # convert current coordinate position to integer value
+        ind = 0
+        sourceNode = 0
+        for value in self.my_dict.values():
+            # sure bug here
+            if 0 <= abs(self.x - value.x) <= 30 and \
+                    0 <= abs(self.y - value.y) <= 30:
+                sourceNode = ind
+            ind = ind + 1
+        self.initValue = sourceNode
+
     def move(self, x, y, path, my_dict):
-        current_node = ""
+
         if path:
             if (x + 10) == my_dict[path[0]].x and (y + 10) == my_dict[path[0]].y:
-                current_node = path[0]
+                self.update_vehicle_information(path[0])
+                # print(self.currentCoorPos)
                 path.pop(0)
             elif (x + 10) < my_dict[path[0]].x:
                 x = x + self.speed
             elif (x + 10) > my_dict[path[0]].x:
                 x = x - self.speed
-
             elif (y + 10) < my_dict[path[0]].y:
                 y = y + self.speed
             elif (y + 10) > my_dict[path[0]].y:
                 y = y - self.speed
-        return x, y, path, current_node
+        return x, y, path, self.currentCoorPos
 
     # get position
     def get_start_pos(self):
@@ -252,11 +274,23 @@ class Vehicle:
 
 
 class Item:
-    def __init__(self, x, y):
+    def __init__(self, position, my_dict):
         self.image = p.transform.scale(itemPicture, (SIZE + 10, SIZE + 10))
-        self.x = x
-        self.y = y
-        self.pos = Position(x, y)
+        self.x = my_dict[position].x - 10
+        self.y = my_dict[position].y - 10
+        self.itemCoorPos = position
+
+        ind = 0
+        targetNode = 0
+        for value in my_dict.values():
+            # sure bug here
+            if 0 <= abs(self.x - value.x) <= 30 and \
+                    0 <= abs(self.y - value.y) <= 30:
+                targetNode = ind
+            ind = ind + 1
+        self.initValue = targetNode
+
+        self.pos = Position(self.x, self.y)
 
 # class Task:
 #     def __init__(self, item):
