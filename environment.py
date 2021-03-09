@@ -29,8 +29,8 @@ def main():
 
     init_pos_x = 30
     init_pos_y = 20
-
-    numberOfVehicles = 2
+    max_number_of_step = 2
+    numberOfVehicles = 1
     vehicle1 = []
     # vehicle = Vehicle(init_pos_x, init_pos_y)
     # vehicle1.append(vehicle)
@@ -39,8 +39,8 @@ def main():
     # vehicle1.append(vehicle)
     vehicle = Vehicle("00", game.my_dict)
     vehicle1.append(vehicle)
-    vehicle = Vehicle("02", game.my_dict)
-    vehicle1.append(vehicle)
+    # vehicle = Vehicle("02", game.my_dict)
+    # vehicle1.append(vehicle)
     # vehicle = Vehicle("03", game.my_dict)
     # vehicle1.append(vehicle)
     #########################################
@@ -63,31 +63,31 @@ def main():
 
     # hasItem = False
     # add Item task
-    numberOfItems = 2
+    numberOfItems = 1
     # simple form
     item = []
     # test assign nearly robot
-    item.append(Item("12", game.my_dict))
+    # item.append(Item("12", game.my_dict))
 
     # item.append(Item("30", game.my_dict))
-    item.append(Item("32", game.my_dict))
+    # item.append(Item("32", game.my_dict))
     # item.append(Item("34", game.my_dict))
     #
     # item.append(Item("04", game.my_dict))
     # item.append(Item("14", game.my_dict))
-    # item.append(Item("44", game.my_dict))
+    item.append(Item("44", game.my_dict))
 
     # queue form
     # test assign nearly robot
-    task_list.put(Item("12", game.my_dict))
+    # task_list.put(Item("12", game.my_dict))
 
     # task_list.put(Item("30", game.my_dict))
-    task_list.put(Item("32", game.my_dict))
+    # task_list.put(Item("32", game.my_dict))
     # task_list.put(Item("34", game.my_dict))
     #
     # task_list.put(Item("04", game.my_dict))
     # task_list.put(Item("14", game.my_dict))
-    # task_list.put(Item("44", game.my_dict))
+    task_list.put(Item("44", game.my_dict))
 
     while game.running == 1:
         for event in p.event.get():
@@ -177,14 +177,32 @@ def main():
                 flag_path = False
                 # print('false')
             else:
-                for current_object in temp_path:
+                for current_object in temp_path: # 0: vehicle, 1: item, 2: path
                     # print(type(current_object))
-                    game.color_shortest_path(current_object[2])
+                    game.color_shortest_path(current_object[2][:max_number_of_step])
+
+
                     current_object[0].x, current_object[0].y, current_object[2], current_node = current_object[0].move(
                         current_object[0].x,
                         current_object[0].y,
                         current_object[2],
                         game.my_dict)
+                    if current_object[0].numberOfMovingStep >= max_number_of_step:
+                        current_object[0].numberOfMovingStep = 0
+                        # print("Stop")
+                        # print(current_object[0].currentCoorPos)
+
+                        game.adjacency_matrix[6][11] = 1000
+                        dj = Dijkstra(game.adjacency_matrix)
+                        dj.calculate()
+
+                        next_path = []
+                        if current_object[0].initValue != current_object[1].initValue:
+                            next_path = dj.getBestPath(current_object[0].initValue, current_object[1].initValue)
+                            print(next_path)
+                        # print(game.adjacency_matrix[11][12])
+
+
 
                     # firebase.update_node_data(current_node)
 

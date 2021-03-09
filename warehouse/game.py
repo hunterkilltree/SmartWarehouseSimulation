@@ -118,7 +118,8 @@ class Game:
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 7, 0, 8, 0, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 6, 0],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 6, 0, 10],
-         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 5, 0]]
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 5, 0]
+        ]
 
         print(self.adjacency_matrix)
         print("Coordinate : Position")
@@ -145,6 +146,7 @@ class Game:
 
     # convert from [0, 1, 2] to ['00', '01', '02']
     def map_path(self, path):
+        print("this is path {}".format(path))
         new_path = []
         for i in path:
             if i == -1:
@@ -210,10 +212,12 @@ class Vehicle:
         self.initValue = sourceNode
 
         # other value
+        self.numberOfMovingStep = 0
         self.hasTask = False
         self.obstacle = False
         self.priority = 0  # 0 > 1 > 2 in multi robot
         self.hasItem = False
+
 
 
         # movement
@@ -239,6 +243,7 @@ class Vehicle:
         self.y = self.my_dict[pos_x_y].y - 10
 
         self.currentCoorPos = pos_x_y
+        self.numberOfMovingStep += 1
 
         # convert current coordinate position to integer value
         ind = 0
@@ -278,7 +283,7 @@ class Item:
         self.image = p.transform.scale(itemPicture, (SIZE + 10, SIZE + 10))
         self.x = my_dict[position].x - 10
         self.y = my_dict[position].y - 10
-        self.itemCoorPos = position
+        self.itemCoorPos = position # store node with string value
 
         ind = 0
         targetNode = 0
@@ -288,7 +293,8 @@ class Item:
                     0 <= abs(self.y - value.y) <= 30:
                 targetNode = ind
             ind = ind + 1
-        self.initValue = targetNode
+        self.initValue = targetNode # store node with integer value
+
 
         self.pos = Position(self.x, self.y)
 
