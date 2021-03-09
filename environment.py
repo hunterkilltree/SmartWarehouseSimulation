@@ -59,7 +59,7 @@ def main():
 
     flag_path = False
     temp_path = []
-    vehicle_move = [] # for animation
+    vehicle_move = []  # for animation
 
     # hasItem = False
     # add Item task
@@ -115,19 +115,6 @@ def main():
                     temp_all_best_path = []  # list
                     path = []
 
-                    # explain in notebook
-                    # for i in range(0, numberOfVehicles):
-                    #     for j in range(0, numberOfItems):
-                    #         # temp_all_best_path = dj.getBestPath(sourceNode[i], item[j].initValue)
-                    #         if temp_all_best_path not in path:
-                    #             path.append(temp_all_best_path)
-                    # print("len of sourNode {} ".format(len(sourceNode)))
-                    # for i in range(0, len(sourceNode)):
-                    #     if not task_list.empty():
-                    #         temp_all_best_path = dj.getBestPath(sourceNode[i], task_list.get().initValue)
-                    #         if temp_all_best_path not in path:
-                    #             path.append(temp_all_best_path)
-
                     # probability: path is the combination (freeRobot, number_task)
                     process_task = []
                     for i in range(0, len(sourceNode)):  # number of free robot
@@ -155,14 +142,16 @@ def main():
                     current_path = []  # this is the array of object (Vehicle, path)
                     for i in range(0, len(sourceNode)):  # number of free robot
                         if list_temp_all_best_path != []:
-                            current_choice = random.choice(list_temp_all_best_path)  # get random robot for given item path
+                            current_choice = random.choice(
+                                list_temp_all_best_path)  # get random robot for given item path
                             print("current path {}".format(list_temp_all_best_path))
                             if current_choice not in current_path:
                                 current_path.append(current_choice)  # add to array
                                 # vehicle to be removed
                                 vehicle_to_be_removed = current_choice[0]
                                 item_to_be_removed = current_choice[1]
-                                list_temp_all_best_path = remove_path(vehicle_to_be_removed, item_to_be_removed, list_temp_all_best_path)
+                                list_temp_all_best_path = remove_path(vehicle_to_be_removed, item_to_be_removed,
+                                                                      list_temp_all_best_path)
 
                     # convert to node
                     # print(current_path)
@@ -173,9 +162,7 @@ def main():
                         if game.map_path(cp[2]) not in new_path:  # remove this line???
                             new_path.append([cp[0], cp[1], game.map_path(cp[2])])
 
-
                     temp_path = new_path
-
 
                     # TODO: robot will move to object ###
 
@@ -188,38 +175,30 @@ def main():
         if flag_path:
             if not temp_path:
                 flag_path = False
-                print('false')
+                # print('false')
             else:
                 for current_object in temp_path:
-                    # for i in current_object[2]:
-                    print(type(current_object))
+                    # print(type(current_object))
                     game.color_shortest_path(current_object[2])
-                    current_object[0].x, current_object[0].y, current_object[2], current_node = current_object[0].move(current_object[0].x,
-                                                                                                current_object[0].y,
-                                                                                                current_object[2],
-                                                                                                game.my_dict)
-                    # print(len(current_object[2]))
-                # for i in temp_path:
-                #
-                #     # print("temp_path {}".format(temp_path[tp]))
-                #     game.color_shortest_path(temp_path[i])
-                #
-                #     # moving robot in grid
-                #     vehicle1[i].x, vehicle1[i].y, temp_path[i], current_node = vehicle1[i].move(vehicle1[i].x,
-                #                                                                                 vehicle1[i].y,
-                #                                                                                 temp_path[i],
-                #                                                                                 game.my_dict)
+                    current_object[0].x, current_object[0].y, current_object[2], current_node = current_object[0].move(
+                        current_object[0].x,
+                        current_object[0].y,
+                        current_object[2],
+                        game.my_dict)
+
                     # firebase.update_node_data(current_node)
+
         game.update()
         game.draw_board()
+        # loop for load all vehicle
         for i in range(0, numberOfVehicles):
             game.load_vehicles(vehicle1[i])
 
+        # loop for load all exit item
         # if hasItem:
         for i in range(0, numberOfItems):
             game.load_item(item[i])
         game.tick(FPS)
-
 
 
 if __name__ == "__main__":
