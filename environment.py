@@ -13,11 +13,11 @@ task_list = task.Queue()
 FPS = 50
 
 
-def remove_path(vehicle_to_be_removed, item_to_be_removed, list_temp_all_best_path):
-    for cp in list_temp_all_best_path[:]:
+def remove_path(vehicle_to_be_removed, item_to_be_removed, list_all_pair):
+    for cp in list_all_pair[:]:
         if vehicle_to_be_removed in cp or item_to_be_removed in cp:
-            list_temp_all_best_path.remove(cp)
-    return list_temp_all_best_path
+            list_all_pair.remove(cp)
+    return list_all_pair
 
 
 def main():
@@ -29,7 +29,7 @@ def main():
 
     init_pos_x = 30
     init_pos_y = 20
-    max_number_of_step = 10
+    max_number_of_step = 3
     numberOfVehicles = 3
     vehicle1 = []
     # vehicle = Vehicle(init_pos_x, init_pos_y)
@@ -51,7 +51,7 @@ def main():
 
     dj = Dijkstra(game.adjacency_matrix)
     dj.calculate()
-    print(dj.path)
+    # print(dj.path)
 
     path = []
     newpath = []
@@ -104,16 +104,14 @@ def main():
 
                     # TODO: get the best path for all free robot
                     # clear path after press 0
-
                     sourceNode = []
+                    pair_robot_item = []  # list
+                    path = []
                     # get all free robot
                     for i in range(0, numberOfVehicles):
                         if not vehicle1[i].hasTask:
                             print("Vehicle init position {}".format(vehicle1[i].currentCoorPos))
                             sourceNode.append(vehicle1[i])
-
-                    temp_all_best_path = []  # list
-                    path = []
 
                     # probability: path is the combination (freeRobot, number_task)
                     process_task = []
@@ -124,45 +122,52 @@ def main():
                     # conduct the combination
                     for i in range(0, len(sourceNode)):
                         for j in range(0, len(process_task)):
-                            print("Number of task{}{}".format(i, j))
-                            path = dj.getBestPath(sourceNode[i].initValue, process_task[j].initValue)
-                            # if path not in temp_all_best_path.values(): #  remove this line???
-                            # temp_all_best_path.update({path: vehicle1[i]})
-                            temp_all_best_path.append((vehicle1[i], process_task[j], path))
+                            # print("Number of task{}{}".format(i, j))
+                            pair_robot_item.append((vehicle1[i], process_task[j], path))
 
-                    print("get best path for all sourceNode(vehicles)")
-                    print(temp_all_best_path)
+
                     # TODO: get the best path for all free robot ###
 
                     # TODO: robot will move to object
                     # pick random
-                    list_temp_all_best_path = temp_all_best_path  # should remove
+                    list_all_pair = pair_robot_item  # should remove
 
-                    print(list_temp_all_best_path)
-                    current_path = []  # this is the array of object (Vehicle, path)
+
+                    current_pair = []  # this is the array of object (Vehicle, Item)
                     for i in range(0, len(sourceNode)):  # number of free robot
-                        if list_temp_all_best_path != []:
-                            current_choice = random.choice(
-                                list_temp_all_best_path)  # get random robot for given item path
-                            print("current path {}".format(list_temp_all_best_path))
-                            if current_choice not in current_path:
-                                current_path.append(current_choice)  # add to array
+                        if list_all_pair:
+                            current_choice = random.choice(list_all_pair)  # get random pair robot item
+                            if current_choice not in current_pair:
+                                current_pair.append(current_choice)  # add to array
                                 # vehicle to be removed
                                 vehicle_to_be_removed = current_choice[0]
                                 item_to_be_removed = current_choice[1]
-                                list_temp_all_best_path = remove_path(vehicle_to_be_removed, item_to_be_removed,
-                                                                      list_temp_all_best_path)
+                                list_all_pair = remove_path(vehicle_to_be_removed, item_to_be_removed, list_all_pair)
 
+                    # path finding
+                    current_path = []
+                    for pair in current_pair: # 0: vehicle, 1: item
+                        dj = Dijkstra(game.adjacency_matrix)
+                        dj.calculate()
+                        path = dj.getBestPath(pair[0].initValue, pair[1].initValue) # if path is null mean the task need put in the queue again
+                        new_path = game.map_path(path)
+
+                        # remove all path has the same postion with the same value
+                        # example
+                        # 0 1 3  4 5 6
+                        # 4 2 3  8 9 => 4 2
+
+                        if new_path not in current_path:
+                            current_path.append([pair[0], pair[1], new_path])
+
+                            pair[0].update_occupy_node(new_path[:max_number_of_step])
+                            for i in range(0, len(pair[0].occupyEdge) - 1):
+                                game.adjacency_matrix[pair[0].occupyEdge[i]][pair[0].occupyEdge[i + 1]] = 0  # zero mean no path
+                                game.adjacency_matrix[pair[0].occupyEdge[i + 1]][pair[0].occupyEdge[i]] = 0 # bi direction
+                            print(game.adjacency_matrix)
                     # convert to node
-                    # print(current_path)
-                    new_path = []
-
-                    for cp in current_path:
-                        print(cp)
-                        if game.map_path(cp[2]) not in new_path:  # remove this line???
-                            new_path.append([cp[0], cp[1], game.map_path(cp[2])])
-
-                    temp_path = new_path
+                    print("this is current path {}".format(current_path))
+                    temp_path = current_path
 
                     # TODO: robot will move to object ###
 
@@ -182,15 +187,18 @@ def main():
                     current_object[0].update_occupy_node(current_object[2][:max_number_of_step])
                     # update data to map
                     for i in range(0, len(current_object[0].occupyEdge) - 1):
-                        game.adjacency_matrix[current_object[0].occupyEdge[i]][current_object[0].occupyEdge[i + 1]] = 1000 # a very huge number
+                        game.adjacency_matrix[current_object[0].occupyEdge[i]][current_object[0].occupyEdge[i + 1]] = 0 # zero mean no path
+                        game.adjacency_matrix[current_object[0].occupyEdge[i + 1]][current_object[0].occupyEdge[i]] = 0
 
                     # print(game.adjacency_matrix)
                     game.color_shortest_path(current_object[2][:max_number_of_step], current_object[0].colorPath) #  color to max node number
+
                     current_object[0].x, current_object[0].y, current_object[2], current_node = current_object[0].move(
                         current_object[0].x,
                         current_object[0].y,
                         current_object[2],
                         game.my_dict)
+
                     if current_object[0].numberOfMovingStep >= max_number_of_step:
                         current_object[0].numberOfMovingStep = 0
                         # print("Stop")
@@ -200,8 +208,11 @@ def main():
 
                         # free all occupy node
                         for i in range(0, len(current_object[0].occupyEdge) - 1):
+                            value =  current_object[0].returnMapValue.pop(0)  # return back value
+                            game.adjacency_matrix[current_object[0].occupyEdge[i + 1]][
+                                current_object[0].occupyEdge[i]] = value
                             game.adjacency_matrix[current_object[0].occupyEdge[i]][
-                                current_object[0].occupyEdge[i + 1]] = current_object[0].returnMapValue.pop(0)  # return back value
+                                current_object[0].occupyEdge[i + 1]] = value
                         current_object[0].free_occupy_node()
 
                         dj = Dijkstra(game.adjacency_matrix)
