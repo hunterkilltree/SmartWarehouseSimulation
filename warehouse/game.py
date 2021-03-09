@@ -139,8 +139,8 @@ class Game:
     def load_item(self, item):
         self.screen.blit(item.image, p.Rect(item.x, item.y, SIZE, SIZE))
 
-    def color_shortest_path(self, path):
-        color = p.Color("red")
+    def color_shortest_path(self, path, vehicle_color):
+        color = p.Color(vehicle_color)
         for i in range(0, len(path) - 1):
             p.draw.line(self.screen, color, self.my_dict[path[i]], self.my_dict[path[i + 1]], 3)
 
@@ -190,11 +190,12 @@ class Game:
 
 
 class Vehicle:
-    def __init__(self, position, my_dict):
+    def __init__(self, position, my_dict, adjacency_matrix, color):
         # map coordinate with pixel position
 
         self.image = p.transform.scale(picture, (SIZE + 10, SIZE + 10))  # scale the given image fit the grid
         self.my_dict = my_dict
+        self.adjacency_matrix = adjacency_matrix
         self.x = my_dict[position].x - 10
         self.y = my_dict[position].y - 10
 
@@ -212,7 +213,10 @@ class Vehicle:
         self.initValue = sourceNode
 
         # other value
+        self.colorPath = color
+        self.returnMapValue = []
         self.numberOfMovingStep = 0
+        self.occupyEdge = []
         self.hasTask = False
         self.obstacle = False
         self.priority = 0  # 0 > 1 > 2 in multi robot
@@ -237,6 +241,31 @@ class Vehicle:
         self.move_x = 0
         self.move_y = 0
         self.speed = 1
+
+    def convert_coor_to_integer(self, coor):
+        # convert current coordinate position to integer value
+        ind = 0
+        sourceNode = 0
+        for value in self.my_dict.values():
+            # sure bug here
+            if 0 <= abs(self.my_dict[coor].x - value.x) <= 30 and \
+                    0 <= abs(self.my_dict[coor].y - value.y) <= 30:
+                sourceNode = ind
+            ind = ind + 1
+        return sourceNode
+
+    def update_occupy_node(self, path):
+        for i in path:
+            temp = self.convert_coor_to_integer(i)
+            if temp not in self.occupyEdge:
+                self.occupyEdge.append(temp)
+
+        for i in range(0, len(self.occupyEdge) - 1):
+            self.returnMapValue.append(self.adjacency_matrix[self.occupyEdge[i]][self.occupyEdge[i + 1]])
+
+    def free_occupy_node(self):
+        self.occupyEdge = []
+        self.returnMapValue = []
 
     def update_vehicle_information(self, pos_x_y):
         self.x = self.my_dict[pos_x_y].x - 10

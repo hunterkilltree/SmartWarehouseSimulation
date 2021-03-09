@@ -29,20 +29,20 @@ def main():
 
     init_pos_x = 30
     init_pos_y = 20
-    max_number_of_step = 2
-    numberOfVehicles = 1
+    max_number_of_step = 10
+    numberOfVehicles = 3
     vehicle1 = []
     # vehicle = Vehicle(init_pos_x, init_pos_y)
     # vehicle1.append(vehicle)
     #
     # vehicle = Vehicle(30, 220)
     # vehicle1.append(vehicle)
-    vehicle = Vehicle("00", game.my_dict)
+    vehicle = Vehicle("00", game.my_dict, game.adjacency_matrix, 'red')
     vehicle1.append(vehicle)
-    # vehicle = Vehicle("02", game.my_dict)
-    # vehicle1.append(vehicle)
-    # vehicle = Vehicle("03", game.my_dict)
-    # vehicle1.append(vehicle)
+    vehicle = Vehicle("02", game.my_dict, game.adjacency_matrix, 'blue')
+    vehicle1.append(vehicle)
+    vehicle = Vehicle("03", game.my_dict, game.adjacency_matrix, 'green')
+    vehicle1.append(vehicle)
     #########################################
 
     # load multiple robot based on the give position
@@ -63,14 +63,14 @@ def main():
 
     # hasItem = False
     # add Item task
-    numberOfItems = 1
+    numberOfItems = 3
     # simple form
     item = []
     # test assign nearly robot
     # item.append(Item("12", game.my_dict))
 
-    # item.append(Item("30", game.my_dict))
-    # item.append(Item("32", game.my_dict))
+    item.append(Item("30", game.my_dict))
+    item.append(Item("32", game.my_dict))
     # item.append(Item("34", game.my_dict))
     #
     # item.append(Item("04", game.my_dict))
@@ -81,8 +81,8 @@ def main():
     # test assign nearly robot
     # task_list.put(Item("12", game.my_dict))
 
-    # task_list.put(Item("30", game.my_dict))
-    # task_list.put(Item("32", game.my_dict))
+    task_list.put(Item("30", game.my_dict))
+    task_list.put(Item("32", game.my_dict))
     # task_list.put(Item("34", game.my_dict))
     #
     # task_list.put(Item("04", game.my_dict))
@@ -179,9 +179,13 @@ def main():
             else:
                 for current_object in temp_path: # 0: vehicle, 1: item, 2: path
                     # print(type(current_object))
-                    game.color_shortest_path(current_object[2][:max_number_of_step])
+                    current_object[0].update_occupy_node(current_object[2][:max_number_of_step])
+                    # update data to map
+                    for i in range(0, len(current_object[0].occupyEdge) - 1):
+                        game.adjacency_matrix[current_object[0].occupyEdge[i]][current_object[0].occupyEdge[i + 1]] = 1000 # a very huge number
 
-
+                    # print(game.adjacency_matrix)
+                    game.color_shortest_path(current_object[2][:max_number_of_step], current_object[0].colorPath) #  color to max node number
                     current_object[0].x, current_object[0].y, current_object[2], current_node = current_object[0].move(
                         current_object[0].x,
                         current_object[0].y,
@@ -192,7 +196,14 @@ def main():
                         # print("Stop")
                         # print(current_object[0].currentCoorPos)
 
-                        game.adjacency_matrix[6][11] = 1000
+                        # game.adjacency_matrix[6][11] = 1000
+
+                        # free all occupy node
+                        for i in range(0, len(current_object[0].occupyEdge) - 1):
+                            game.adjacency_matrix[current_object[0].occupyEdge[i]][
+                                current_object[0].occupyEdge[i + 1]] = current_object[0].returnMapValue.pop(0)  # return back value
+                        current_object[0].free_occupy_node()
+
                         dj = Dijkstra(game.adjacency_matrix)
                         dj.calculate()
 
@@ -200,8 +211,6 @@ def main():
                         if current_object[0].initValue != current_object[1].initValue:
                             next_path = dj.getBestPath(current_object[0].initValue, current_object[1].initValue)
                             print(next_path)
-                        # print(game.adjacency_matrix[11][12])
-
 
 
                     # firebase.update_node_data(current_node)
