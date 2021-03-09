@@ -59,16 +59,17 @@ def main():
 
     flag_path = False
     temp_path = []
+    vehicle_move = [] # for animation
 
     # hasItem = False
     # add Item task
-    numberOfItems = 3
+    numberOfItems = 2
     # simple form
     item = []
     # test assign nearly robot
     item.append(Item("12", game.my_dict))
 
-    item.append(Item("30", game.my_dict))
+    # item.append(Item("30", game.my_dict))
     item.append(Item("32", game.my_dict))
     # item.append(Item("34", game.my_dict))
     #
@@ -80,7 +81,7 @@ def main():
     # test assign nearly robot
     task_list.put(Item("12", game.my_dict))
 
-    task_list.put(Item("30", game.my_dict))
+    # task_list.put(Item("30", game.my_dict))
     task_list.put(Item("32", game.my_dict))
     # task_list.put(Item("34", game.my_dict))
     #
@@ -156,23 +157,25 @@ def main():
                         if list_temp_all_best_path != []:
                             current_choice = random.choice(list_temp_all_best_path)  # get random robot for given item path
                             print("current path {}".format(list_temp_all_best_path))
-                            current_path.append(current_choice)  # add to array
-                            # vehicle to be removed
-                            vehicle_to_be_removed = current_choice[0]
-                            item_to_be_removed =  current_choice[1]
-                            list_temp_all_best_path = remove_path(vehicle_to_be_removed, item_to_be_removed, list_temp_all_best_path)
+                            if current_choice not in current_path:
+                                current_path.append(current_choice)  # add to array
+                                # vehicle to be removed
+                                vehicle_to_be_removed = current_choice[0]
+                                item_to_be_removed = current_choice[1]
+                                list_temp_all_best_path = remove_path(vehicle_to_be_removed, item_to_be_removed, list_temp_all_best_path)
 
                     # convert to node
-                    print(current_path)
+                    # print(current_path)
                     new_path = []
+
                     for cp in current_path:
                         print(cp)
                         if game.map_path(cp[2]) not in new_path:  # remove this line???
-                            new_path.append(game.map_path(cp[2]))
-                    # print("After convert {}".format(new_path[0]))
-                    shortest_path = new_path
+                            new_path.append([cp[0], cp[1], game.map_path(cp[2])])
 
-                    temp_path = shortest_path
+
+                    temp_path = new_path
+
 
                     # TODO: robot will move to object ###
 
@@ -182,32 +185,41 @@ def main():
                     main()
                 # TODO:  stupid reset ###
 
-            if flag_path:
-                if not temp_path:
-                    flag_path = False
-                else:
-                    for i in range(0, len(temp_path)):
-                        # print("temp_path {}".format(temp_path[tp]))
-                        game.color_shortest_path(temp_path[i])
-
-                        # moving robot in grid
-                        # vehicle1[i].x, vehicle1[i].y, temp_path[i], current_node = vehicle1[i].move(
-                        #                                                                 vehicle1[i].x,
-                        #                                                                 vehicle1[i].y,
-                        #                                                                 temp_path[i], game.my_dict
-                        #                                                            )
-
+        if flag_path:
+            if not temp_path:
+                flag_path = False
+                print('false')
+            else:
+                for current_object in temp_path:
+                    # for i in current_object[2]:
+                    print(type(current_object))
+                    game.color_shortest_path(current_object[2])
+                    current_object[0].x, current_object[0].y, current_object[2], current_node = current_object[0].move(current_object[0].x,
+                                                                                                current_object[0].y,
+                                                                                                current_object[2],
+                                                                                                game.my_dict)
+                    # print(len(current_object[2]))
+                # for i in temp_path:
+                #
+                #     # print("temp_path {}".format(temp_path[tp]))
+                #     game.color_shortest_path(temp_path[i])
+                #
+                #     # moving robot in grid
+                #     vehicle1[i].x, vehicle1[i].y, temp_path[i], current_node = vehicle1[i].move(vehicle1[i].x,
+                #                                                                                 vehicle1[i].y,
+                #                                                                                 temp_path[i],
+                #                                                                                 game.my_dict)
                     # firebase.update_node_data(current_node)
+        game.update()
+        game.draw_board()
+        for i in range(0, numberOfVehicles):
+            game.load_vehicles(vehicle1[i])
 
-            game.update()
-            game.draw_board()
-            for i in range(0, numberOfVehicles):
-                game.load_vehicles(vehicle1[i])
+        # if hasItem:
+        for i in range(0, numberOfItems):
+            game.load_item(item[i])
+        game.tick(FPS)
 
-            # if hasItem:
-            for i in range(0, numberOfItems):
-                game.load_item(item[i])
-            game.tick(FPS)
 
 
 if __name__ == "__main__":
