@@ -218,10 +218,13 @@ def main():
                         dj = Dijkstra(game.adjacency_matrix)
                         dj.calculate()
 
+                        # TODO: update new path
                         next_path = []
                         if current_object[0].initValue != current_object[1].initValue:
                             next_path = dj.getBestPath(current_object[0].initValue, current_object[1].initValue)
+                            current_object[2] = next_path #bug here
                             print(next_path)
+                        # TODO: update new path
 
 
                     # firebase.update_node_data(current_node)
