@@ -13,7 +13,7 @@ top, left, space, lines = (20, 20, 100, n)
 programIcon = p.image.load("image/Robot2.ico")
 picture = p.image.load("image/Robot2.png")
 station = p.image.load("image/Station.png")
-itemPicture = p.image.load("image/Robot1.png")
+itemPicture = p.image.load("image/Item.png")
 
 
 # [
@@ -78,20 +78,51 @@ class Game:
             self.list_node.append(key)
         print(self.list_node)
 
-        for r in self.my_dict:
-            matrix = []
-            for c in self.my_dict:
-                if ((int(r[0]) == int(c[0]) or int(r[1]) == int(c[1]))
-                        and
-                        (abs(int(r[0]) - int(c[0])) == 1 or abs(int(r[1]) - int(c[1])) == 1)):
-                    r1 = random.randint(2, 10)
-                    matrix.append(r1)
-                    # print(r + " " + c)
-                else:
-                    matrix.append(0)
-            self.adjacency_matrix.append(matrix)
+        # generate random map
+        # for r in self.my_dict:
+        #     matrix = []
+        #     for c in self.my_dict:
+        #         if ((int(r[0]) == int(c[0]) or int(r[1]) == int(c[1]))
+        #                 and
+        #                 (abs(int(r[0]) - int(c[0])) == 1 or abs(int(r[1]) - int(c[1])) == 1)):
+        #             r1 = random.randint(2, 10)
+        #             matrix.append(r1)
+        #             # print(r + " " + c)
+        #         else:
+        #             matrix.append(0)
+        #     self.adjacency_matrix.append(matrix)
+
+        # setup constant map
+        self.adjacency_matrix = [
+         [0, 5, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [3, 0, 5, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 4, 0, 10, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 10, 0, 8, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 7, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [6, 0, 0, 0, 0, 0, 4, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 6, 0, 0, 0, 9, 0, 3, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 8, 0, 0, 0, 9, 0, 7, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 4, 0, 0, 0, 2, 0, 2, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 10, 0, 0, 0, 7, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 10, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 10, 0, 6, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 4, 0, 3, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 10, 0, 8, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 7, 0, 0, 0, 7, 0, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 9, 0, 5, 0, 0, 0, 7, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 3, 0, 9, 0, 0, 0, 7, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 0, 2, 0, 0, 0, 6, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 6, 0, 0, 0, 0, 0, 5],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 0, 0, 7, 0, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 7, 0, 8, 0, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 6, 0],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 6, 0, 10],
+         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 5, 0]
+        ]
 
         print(self.adjacency_matrix)
+        print("Coordinate : Position")
         print(self.my_dict)
 
     def update(self):
@@ -108,12 +139,14 @@ class Game:
     def load_item(self, item):
         self.screen.blit(item.image, p.Rect(item.x, item.y, SIZE, SIZE))
 
-    def color_shortest_path(self, path):
-        color = p.Color("red")
+    def color_shortest_path(self, path, vehicle_color):
+        color = p.Color(vehicle_color)
         for i in range(0, len(path) - 1):
             p.draw.line(self.screen, color, self.my_dict[path[i]], self.my_dict[path[i + 1]], 3)
 
+    # convert from [0, 1, 2] to ['00', '01', '02']
     def map_path(self, path):
+        print("this is path {}".format(path))
         new_path = []
         for i in path:
             if i == -1:
@@ -157,13 +190,39 @@ class Game:
 
 
 class Vehicle:
-    def __init__(self, init_pos_x, init_pos_y):
-        self.image = p.transform.scale(picture, (SIZE + 10, SIZE + 10))  # scale the given image fit the grid
-        self.x = init_pos_x - 10
-        self.y = init_pos_y - 10
+    def __init__(self, position, my_dict, adjacency_matrix, color):
+        # map coordinate with pixel position
 
+        self.image = p.transform.scale(picture, (SIZE + 10, SIZE + 10))  # scale the given image fit the grid
+        self.my_dict = my_dict
+        self.adjacency_matrix = adjacency_matrix
+        self.x = my_dict[position].x - 10
+        self.y = my_dict[position].y - 10
+
+        self.currentCoorPos = position
+
+        # convert current coordinate position to integer value
+        ind = 0
+        sourceNode = 0
+        for value in my_dict.values():
+            # sure bug here
+            if 0 <= abs(self.x - value.x) <= 30 and \
+                    0 <= abs(self.y - value.y) <= 30:
+                sourceNode = ind
+            ind = ind + 1
+        self.initValue = sourceNode
+
+        # other value
+        self.colorPath = color
+        self.returnMapValue = []
+        self.numberOfMovingStep = 0
+        self.occupyEdge = []
+        self.hasTask = False
         self.obstacle = False
         self.priority = 0  # 0 > 1 > 2 in multi robot
+        self.hasItem = False
+
+
 
         # movement
         self.forward = False
@@ -183,27 +242,91 @@ class Vehicle:
         self.move_y = 0
         self.speed = 1
 
+    def convert_coor_to_integer(self, coor):
+        # convert current coordinate position to integer value
+        ind = 0
+        sourceNode = 0
+        for value in self.my_dict.values():
+            # sure bug here
+            if 0 <= abs(self.my_dict[coor].x - value.x) <= 30 and \
+                    0 <= abs(self.my_dict[coor].y - value.y) <= 30:
+                sourceNode = ind
+            ind = ind + 1
+        return sourceNode
+
+    def update_occupy_node(self, path):
+        for i in path:
+            temp = self.convert_coor_to_integer(i)
+            if temp not in self.occupyEdge:
+                self.occupyEdge.append(temp)
+
+        for i in range(0, len(self.occupyEdge) - 1):
+            self.returnMapValue.append(self.adjacency_matrix[self.occupyEdge[i]][self.occupyEdge[i + 1]])
+
+    def free_occupy_node(self):
+        self.occupyEdge = []
+        self.returnMapValue = []
+
+    def update_vehicle_information(self, pos_x_y):
+        self.x = self.my_dict[pos_x_y].x - 10
+        self.y = self.my_dict[pos_x_y].y - 10
+
+        self.currentCoorPos = pos_x_y
+        self.numberOfMovingStep += 1
+
+        # convert current coordinate position to integer value
+        ind = 0
+        sourceNode = 0
+        for value in self.my_dict.values():
+            # sure bug here
+            if 0 <= abs(self.x - value.x) <= 30 and \
+                    0 <= abs(self.y - value.y) <= 30:
+                sourceNode = ind
+            ind = ind + 1
+        self.initValue = sourceNode
+
     def move(self, x, y, path, my_dict):
-        current_node = ""
+
         if path:
             if (x + 10) == my_dict[path[0]].x and (y + 10) == my_dict[path[0]].y:
-                current_node = path[0]
+                self.update_vehicle_information(path[0])
+                # print(self.currentCoorPos)
                 path.pop(0)
             elif (x + 10) < my_dict[path[0]].x:
                 x = x + self.speed
             elif (x + 10) > my_dict[path[0]].x:
                 x = x - self.speed
-
             elif (y + 10) < my_dict[path[0]].y:
                 y = y + self.speed
             elif (y + 10) > my_dict[path[0]].y:
                 y = y - self.speed
-        return x, y, path, current_node
+        return x, y, path, self.currentCoorPos
+
+    # get position
+    def get_start_pos(self):
+        pass
 
 
 class Item:
-    def __init__(self, x, y):
+    def __init__(self, position, my_dict):
         self.image = p.transform.scale(itemPicture, (SIZE + 10, SIZE + 10))
-        self.x = x
-        self.y = y
-        self.pos = Position(x, y)
+        self.x = my_dict[position].x - 10
+        self.y = my_dict[position].y - 10
+        self.itemCoorPos = position # store node with string value
+
+        ind = 0
+        targetNode = 0
+        for value in my_dict.values():
+            # sure bug here
+            if 0 <= abs(self.x - value.x) <= 30 and \
+                    0 <= abs(self.y - value.y) <= 30:
+                targetNode = ind
+            ind = ind + 1
+        self.initValue = targetNode # store node with integer value
+
+
+        self.pos = Position(self.x, self.y)
+
+# class Task:
+#     def __init__(self, item):
+#         self.Ite
