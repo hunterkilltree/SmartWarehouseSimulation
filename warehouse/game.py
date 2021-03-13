@@ -120,6 +120,18 @@ class Game:
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 6, 0, 10],
          [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 5, 0]
         ]
+        self.occupy_node = [
+                           False, False, False, False, False,
+                           False, False, False, False, False,
+                           False, False, False, False, False,
+                           False, False, False, False, False,
+                           False, False, False, False, False]
+        self.occupy_node[6] = True
+        self.occupy_node[11] = True
+        self.occupy_node[16] = True
+        self.occupy_node[1] = True
+        # self.occupy_node[6] = True
+
 
         print(self.adjacency_matrix)
         print("Coordinate : Position")
@@ -286,7 +298,6 @@ class Vehicle:
         self.initValue = sourceNode
 
     def move(self, x, y, path, my_dict):
-
         if path:
             if (x + 10) == my_dict[path[0]].x and (y + 10) == my_dict[path[0]].y:
                 self.update_vehicle_information(path[0])

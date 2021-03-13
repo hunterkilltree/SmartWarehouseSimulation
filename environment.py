@@ -3,6 +3,7 @@ from warehouse.game import Vehicle
 from warehouse.game import Item
 from server.firebase import Firebase
 from algorithm.dijktra import Dijkstra
+from algorithm.dijktra import DijkstraModify
 import pygame as p
 from itertools import chain
 # store the task list , work as FIFO
@@ -49,8 +50,8 @@ def main():
     for i in range(0, numberOfVehicles):
         game.load_vehicles(vehicle1[i])
 
-    dj = Dijkstra(game.adjacency_matrix)
-    dj.calculate()
+    # dj = Dijkstra(game.adjacency_matrix)
+    # dj.calculate()
     # print(dj.path)
 
     path = []
@@ -147,9 +148,17 @@ def main():
                     # path finding
                     current_path = []
                     for pair in current_pair: # 0: vehicle, 1: item
-                        dj = Dijkstra(game.adjacency_matrix)
+
+                        # version 1
+                        dj = Dijkstra(game.adjacency_matrix, game.occupy_node)
                         dj.calculate()
                         path = dj.getBestPath(pair[0].initValue, pair[1].initValue) # if path is null mean the task need put in the queue again
+
+                        # version 2
+                        # dj = DijkstraModify()
+                        # dj.dijkstra(game.adjacency_matrix, pair[0].initValue)
+                        # path = dj.getBestPath(pair[0].initValue, pair[1].initValue) # if path is null mean the task need put in the queue again
+
                         new_path = game.map_path(path)
 
                         # remove all path has the same postion with the same value
@@ -183,14 +192,16 @@ def main():
                 # print('false')
             else:
                 for current_object in temp_path: # 0: vehicle, 1: item, 2: path
-                    # print(type(current_object))
+
                     current_object[0].update_occupy_node(current_object[2][:max_number_of_step])
                     # update data to map
                     for i in range(0, len(current_object[0].occupyEdge) - 1):
-                        game.adjacency_matrix[current_object[0].occupyEdge[i]][current_object[0].occupyEdge[i + 1]] = 0 # zero mean no path
-                        game.adjacency_matrix[current_object[0].occupyEdge[i + 1]][current_object[0].occupyEdge[i]] = 0
+                        game.adjacency_matrix[current_object[0].occupyEdge[i]][
+                            current_object[0].occupyEdge[i + 1]] = 0  # zero mean no path
+                        game.adjacency_matrix[current_object[0].occupyEdge[i + 1]][
+                            current_object[0].occupyEdge[i]] = 0
 
-                    # print(game.adjacency_matrix)
+                    # path here is the String value
                     game.color_shortest_path(current_object[2][:max_number_of_step], current_object[0].colorPath) #  color to max node number
 
                     current_object[0].x, current_object[0].y, current_object[2], current_node = current_object[0].move(
@@ -199,12 +210,9 @@ def main():
                         current_object[2],
                         game.my_dict)
 
+                    # if number of move greater than the max number of step then free location
                     if current_object[0].numberOfMovingStep >= max_number_of_step:
                         current_object[0].numberOfMovingStep = 0
-                        # print("Stop")
-                        # print(current_object[0].currentCoorPos)
-
-                        # game.adjacency_matrix[6][11] = 1000
 
                         # free all occupy node
                         for i in range(0, len(current_object[0].occupyEdge) - 1):
@@ -215,15 +223,23 @@ def main():
                                 current_object[0].occupyEdge[i + 1]] = value
                         current_object[0].free_occupy_node()
 
-                        dj = Dijkstra(game.adjacency_matrix)
+                        # version 1
+                        dj = Dijkstra(game.adjacency_matrix, game.occupy_node)
                         dj.calculate()
 
-                        # TODO: update new path
+                        # version 2
+                        # dj = DijkstraModify()
+                        # dj.dijkstra(game.adjacency_matrix, current_object[0].initValue)
+                        #
+                        # # TODO: update new path
                         next_path = []
                         if current_object[0].initValue != current_object[1].initValue:
+                            print("This is bug {} {}".format(current_object[0].initValue, current_object[1].initValue))
                             next_path = dj.getBestPath(current_object[0].initValue, current_object[1].initValue)
-                            current_object[2] = next_path #bug here
-                            print(next_path)
+
+                            # next_path = dj.getBestPath(current_object[0].initValue, current_object[1].initValue)  # if path is null mean the task need put in the queue again
+
+                            current_object[2] = game.map_path(next_path) #remember convert
                         # TODO: update new path
 
 
