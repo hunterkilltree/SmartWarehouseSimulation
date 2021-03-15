@@ -126,11 +126,11 @@ class Game:
                            False, False, False, False, False,
                            False, False, False, False, False,
                            False, False, False, False, False]
-        self.occupy_node[6] = True
-        self.occupy_node[11] = True
-        self.occupy_node[16] = True
-        self.occupy_node[1] = True
         # self.occupy_node[6] = True
+        # self.occupy_node[11] = True
+        # self.occupy_node[16] = True
+        # self.occupy_node[1] = True
+
 
 
         print(self.adjacency_matrix)
@@ -180,16 +180,20 @@ class Game:
                 True,  # With anti aliasing
                 (0, 0, 0))  # RGB Color
 
-            self.screen.blit(
-                coord_text,
-                (
-                    self.points[i][0].x - round(coord_text.get_width() / 2),
-                    self.points[i][0].y - coord_text.get_height()))
+            # vertical text
+            # self.screen.blit(
+            #     coord_text,
+            #     (
+            #         self.points[i][0].x - round(coord_text.get_width() / 2),
+            #         self.points[i][0].y - coord_text.get_height()))
+            # horizontal text
             self.screen.blit(
                 coord_text,
                 (
                     self.points[0][i].x - coord_text.get_width(),
                     self.points[0][i].y - round(coord_text.get_height() / 2)))
+
+
 
         for x in range(lines):
             # Draw horizontal lines
@@ -200,9 +204,50 @@ class Game:
             p.draw.line(self.screen, color, self.points[x][0], self.points[x][lines - 1])
             p.draw.circle(self.screen, color_circle, self.points[0][x], 2, 0)
 
+        for i in range(0, lines):
+            coord_text = self.font_renderer.render(
+                str("1"),  # The font to render
+                True,  # With anti aliasing
+                (0, 0, 0))  # RGB Color
+            for j in range(0, lines - 1):
+                # print("{} {}".format(self.points[i][j].x, self.points[i][j].y))
+                # compute middle point above line
+
+                # put text to the right line
+                self.screen.blit(
+                    coord_text,
+                    (
+                        (self.points[i][j].x + self.points[i][j + 1].x) / 2 + 10,
+                        ((self.points[i][j].y + self.points[i][j + 1].y) / 2) - round(
+                            coord_text.get_height() / 2)))
+
+                # put text to the left line
+                self.screen.blit(
+                    coord_text,
+                    (
+                        (self.points[i][j].x + self.points[i][j + 1].x) / 2 - 10,
+                        ((self.points[i][j].y + self.points[i][j + 1].y) / 2) - round(
+                            coord_text.get_height() / 2)))
+
+                # put text below line
+                self.screen.blit(
+                    coord_text,
+                    (
+                        (self.points[i][j].y + self.points[i][j + 1].y) / 2,
+                        ((self.points[i][j].x + self.points[i][j + 1].x) / 2) + 10 - round(
+                            coord_text.get_height() / 2)))
+
+                # put text above line
+                self.screen.blit(
+                    coord_text,
+                    (
+                        (self.points[i][j].y + self.points[i][j + 1].y) / 2,
+                        ((self.points[i][j].x + self.points[i][j + 1].x) / 2) - 10 - round(
+                            coord_text.get_height() / 2)))
+
 
 class Vehicle:
-    def __init__(self, position, my_dict, adjacency_matrix, color):
+    def __init__(self, position, my_dict, adjacency_matrix, color, priority):
         # map coordinate with pixel position
 
         self.image = p.transform.scale(picture, (SIZE + 10, SIZE + 10))  # scale the given image fit the grid
@@ -231,12 +276,13 @@ class Vehicle:
         self.occupyEdge = []
         self.hasTask = False
         self.obstacle = False
-        self.priority = 0  # 0 > 1 > 2 in multi robot
+        self.priority = priority  # 0 > 1 > 2 in multi robot
         self.hasItem = False
 
 
 
         # movement
+        self.state = "Move" # Move or Stop
         self.forward = False
         self.backward = False
         self.left = False
