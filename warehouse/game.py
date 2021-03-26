@@ -254,7 +254,7 @@ class Game:
                             coord_text.get_height() / 2)))
 
                 coord_text = self.font_renderer.render(
-                    str(self.adjacency_matrix[prev_next_point_2][next_point_2]),
+                    str(self.adjacency_matrix[next_point_2][prev_next_point_2]),
                     True,
                     (0, 0, 0))
                 # put text above line
@@ -337,9 +337,10 @@ class Vehicle:
 
     def update_occupy_node(self, path):
         for i in path:
-            temp = self.convert_coor_to_integer(i)
-            if temp not in self.occupyEdge:
-                self.occupyEdge.append(temp)
+            node_int_value = self.convert_coor_to_integer(i)
+            if node_int_value not in self.occupyEdge:
+
+                self.occupyEdge.append(node_int_value)
 
         for i in range(0, len(self.occupyEdge) - 1):
             self.returnMapValue.append(self.adjacency_matrix[self.occupyEdge[i]][self.occupyEdge[i + 1]])
