@@ -204,16 +204,24 @@ class Game:
             p.draw.line(self.screen, color, self.points[x][0], self.points[x][lines - 1])
             p.draw.circle(self.screen, color_circle, self.points[0][x], 2, 0)
 
-        for i in range(0, lines):
-            coord_text = self.font_renderer.render(
-                str("1"),  # The font to render
-                True,  # With anti aliasing
-                (0, 0, 0))  # RGB Color
-            for j in range(0, lines - 1):
-                # print("{} {}".format(self.points[i][j].x, self.points[i][j].y))
-                # compute middle point above line
 
+        next_point = 0
+
+        next_point_2 = 0
+        prev_next_point_2 = 0
+
+        for i in range(0, lines):
+            top_x = next_point
+            bot_x = next_point
+            next_point_2 = i + 5
+            prev_next_point_2 = i
+            for j in range(0, 5 - 1):
                 # put text to the right line
+                coord_text = self.font_renderer.render(
+                    str(self.adjacency_matrix[top_x][bot_x + 1]),
+                    True,
+                    (0, 0, 0))
+
                 self.screen.blit(
                     coord_text,
                     (
@@ -221,6 +229,10 @@ class Game:
                         ((self.points[i][j].y + self.points[i][j + 1].y) / 2) - round(
                             coord_text.get_height() / 2)))
 
+                coord_text = self.font_renderer.render(
+                    str(self.adjacency_matrix[bot_x + 1][top_x]),
+                    True,
+                    (0, 0, 0))
                 # put text to the left line
                 self.screen.blit(
                     coord_text,
@@ -229,6 +241,10 @@ class Game:
                         ((self.points[i][j].y + self.points[i][j + 1].y) / 2) - round(
                             coord_text.get_height() / 2)))
 
+                coord_text = self.font_renderer.render(
+                    str(self.adjacency_matrix[prev_next_point_2][next_point_2]),
+                    True,
+                    (0, 0, 0))
                 # put text below line
                 self.screen.blit(
                     coord_text,
@@ -237,6 +253,10 @@ class Game:
                         ((self.points[i][j].x + self.points[i][j + 1].x) / 2) + 10 - round(
                             coord_text.get_height() / 2)))
 
+                coord_text = self.font_renderer.render(
+                    str(self.adjacency_matrix[prev_next_point_2][next_point_2]),
+                    True,
+                    (0, 0, 0))
                 # put text above line
                 self.screen.blit(
                     coord_text,
@@ -245,6 +265,11 @@ class Game:
                         ((self.points[i][j].x + self.points[i][j + 1].x) / 2) - 10 - round(
                             coord_text.get_height() / 2)))
 
+                top_x = top_x + 1
+                bot_x = bot_x + 1
+                prev_next_point_2 = next_point_2
+                next_point_2 = next_point_2 + 5
+            next_point = next_point + 5
 
 class Vehicle:
     def __init__(self, position, my_dict, adjacency_matrix, color, priority):
@@ -278,8 +303,6 @@ class Vehicle:
         self.obstacle = False
         self.priority = priority  # 0 > 1 > 2 in multi robot
         self.hasItem = False
-
-
 
         # movement
         self.state = "Move" # Move or Stop
