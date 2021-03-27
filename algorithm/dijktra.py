@@ -61,15 +61,16 @@ class Dijkstra:
         return [i for i in reversed(self._getBestPath(frm, to, [to]))]
 
     def _getBestPath(self, frm, to, path):
-        print()
-        print("This is the from {} to {} path {}".format(frm, to, path))
+
         path_ = self.path[frm]
         lastNode = path_[to]
+        if lastNode in path: # check circle => deadlock
+            return []
         path.append(lastNode)
         if (lastNode == frm):
             return path
-        elif lastNode in path: # fix bug 13/03/2021
-            return path
+        # elif lastNode in path and lastNode != frm: # fix bug 13/03/2021
+        #     return [] # check circle => deadlock
         else:
             return self._getBestPath(frm, lastNode, path)
 
