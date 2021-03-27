@@ -1,7 +1,7 @@
 from warehouse.game import Game
 from warehouse.game import Vehicle
 from warehouse.game import Item
-from server.firebase import Firebase
+# from server.firebase import Firebase
 from algorithm.dijktra import Dijkstra
 from algorithm.dijktra import DijkstraModify
 import pygame as p
@@ -30,19 +30,23 @@ def main():
 
     init_pos_x = 30
     init_pos_y = 20
-    max_number_of_step = 3
-    numberOfVehicles = 3
+    max_number_of_step = 30
+    numberOfVehicles = 5
     vehicle1 = []
     # vehicle = Vehicle(init_pos_x, init_pos_y)
     # vehicle1.append(vehicle)
     #
     # vehicle = Vehicle(30, 220)
     # vehicle1.append(vehicle)
-    vehicle = Vehicle("00", game.my_dict, game.adjacency_matrix, 'red')
+    vehicle = Vehicle("00", game.my_dict, game.adjacency_matrix, 'red', 1)
     vehicle1.append(vehicle)
-    vehicle = Vehicle("02", game.my_dict, game.adjacency_matrix, 'blue')
+    vehicle = Vehicle("02", game.my_dict, game.adjacency_matrix, 'blue', 2)
     vehicle1.append(vehicle)
-    vehicle = Vehicle("03", game.my_dict, game.adjacency_matrix, 'green')
+    vehicle = Vehicle("04", game.my_dict, game.adjacency_matrix, 'green', 3)
+    vehicle1.append(vehicle)
+    vehicle = Vehicle("00", game.my_dict, game.adjacency_matrix, 'red', 4)
+    vehicle1.append(vehicle)
+    vehicle = Vehicle("00", game.my_dict, game.adjacency_matrix, 'red', 5)
     vehicle1.append(vehicle)
     #########################################
 
@@ -76,7 +80,7 @@ def main():
     #
     # item.append(Item("04", game.my_dict))
     # item.append(Item("14", game.my_dict))
-    item.append(Item("44", game.my_dict))
+    item.append(Item("33", game.my_dict))
 
     # queue form
     # test assign nearly robot
@@ -88,7 +92,7 @@ def main():
     #
     # task_list.put(Item("04", game.my_dict))
     # task_list.put(Item("14", game.my_dict))
-    task_list.put(Item("44", game.my_dict))
+    task_list.put(Item("33", game.my_dict))
 
     while game.running == 1:
         for event in p.event.get():
@@ -121,10 +125,10 @@ def main():
                             process_task.append(task_list.get())
 
                     # conduct the combination
-                    for i in range(0, len(sourceNode)):
-                        for j in range(0, len(process_task)):
+                    for v in sourceNode:
+                        for p_task in process_task:
                             # print("Number of task{}{}".format(i, j))
-                            pair_robot_item.append((vehicle1[i], process_task[j], path))
+                            pair_robot_item.append((v, p_task))
 
 
                     # TODO: get the best path for all free robot ###
@@ -153,6 +157,11 @@ def main():
                         dj = Dijkstra(game.adjacency_matrix, game.occupy_node)
                         dj.calculate()
                         path = dj.getBestPath(pair[0].initValue, pair[1].initValue) # if path is null mean the task need put in the queue again
+                        if path == []:
+                            task_list.put(pair[1])
+                            continue
+                        else:
+                            pair[0].hasTask = True # robot is in task
 
                         # version 2
                         # dj = DijkstraModify()
@@ -161,7 +170,7 @@ def main():
 
                         new_path = game.map_path(path)
 
-                        # remove all path has the same postion with the same value
+                        # remove all path has the same position with the same value
                         # example
                         # 0 1 3  4 5 6
                         # 4 2 3  8 9 => 4 2
@@ -169,10 +178,11 @@ def main():
                         if new_path not in current_path:
                             current_path.append([pair[0], pair[1], new_path])
 
-                            pair[0].update_occupy_node(new_path[:max_number_of_step])
+                            pair[0].update_occupy_node(new_path[:max_number_of_step], game) # add True if node is in the path
+
                             for i in range(0, len(pair[0].occupyEdge) - 1):
                                 game.adjacency_matrix[pair[0].occupyEdge[i]][pair[0].occupyEdge[i + 1]] = 0  # zero mean no path
-                                game.adjacency_matrix[pair[0].occupyEdge[i + 1]][pair[0].occupyEdge[i]] = 0 # bi direction
+                                # game.adjacency_matrix[pair[0].occupyEdge[i + 1]][pair[0].occupyEdge[i]] = 0 #  no bi direction
                             print(game.adjacency_matrix)
                     # convert to node
                     print("this is current path {}".format(current_path))
@@ -191,62 +201,139 @@ def main():
                 flag_path = False
                 # print('false')
             else:
-                for current_object in temp_path: # 0: vehicle, 1: item, 2: path
 
-                    current_object[0].update_occupy_node(current_object[2][:max_number_of_step])
+
+                for current_object in temp_path: # 0: vehicle, 1: item, 2: path
+                    # current_object[0].update_occupy_node(current_object[2][:max_number_of_step], game)
                     # update data to map
-                    for i in range(0, len(current_object[0].occupyEdge) - 1):
+
+                    for i in range(0, len(current_object[0].occupyEdge[:max_number_of_step]) - 1):
                         game.adjacency_matrix[current_object[0].occupyEdge[i]][
-                            current_object[0].occupyEdge[i + 1]] = 0  # zero mean no path
-                        game.adjacency_matrix[current_object[0].occupyEdge[i + 1]][
-                            current_object[0].occupyEdge[i]] = 0
+                            current_object[0].occupyEdge[i + 1]] = 0 # zero mean no path
+                        # game.adjacency_matrix[current_object[0].occupyEdge[i + 1]][
+                        #     current_object[0].occupyEdge[i]] = 0  # no bi direction
+                        # print("hello {} {}".format(current_object[0].occupyEdge[i], current_object[0].occupyEdge[i + 1]))
+                        # game.adjacency_matrix[current_object[0].occupyEdge[i + 1]][
+                        #     current_object[0].occupyEdge[i]] = 0
 
                     # path here is the String value
-                    game.color_shortest_path(current_object[2][:max_number_of_step], current_object[0].colorPath) #  color to max node number
+                    game.color_shortest_path(current_object[2][:max_number_of_step-1], current_object[0].colorPath) #  color to max node number
 
-                    current_object[0].x, current_object[0].y, current_object[2], current_node = current_object[0].move(
-                        current_object[0].x,
-                        current_object[0].y,
-                        current_object[2],
-                        game.my_dict)
+                    if current_object[0].state == "Move":
+                        current_object[0].x, current_object[0].y, current_object[2], current_node = current_object[0].move(
+                            current_object[0].x,
+                            current_object[0].y,
+                            current_object[2],
+                            game.my_dict)
 
-                    # if number of move greater than the max number of step then free location
+                    if current_object[2] == []: # reach the item
+                        current_object[0].state == "Stop"
+                        for i in range(0, len(current_object[0].occupyEdge[:max_number_of_step]) - 1):
+                            print(i)
+                            value = current_object[0].returnMapValue.pop(0)  # return back value
+                            game.adjacency_matrix[current_object[0].occupyEdge[i]][
+                                current_object[0].occupyEdge[i + 1]] = value
+                            print('{} to {} value {}'.format(current_object[0].occupyEdge[i], current_object[0].occupyEdge[i + 1], value))
+
+                            # game.adjacency_matrix[current_object[0].occupyEdge[i]][
+                            #     current_object[0].occupyEdge[i + 1]] = value
+                        for i in current_object[0].occupyNode:
+                            game.occupy_node[i] = False
+                        current_object[0].free_occupy_node()
+
+
+
+                    # if number of move greater than the max number of step then free previous location
                     if current_object[0].numberOfMovingStep >= max_number_of_step:
+                        # print("start to find aother paht {}".format(current_object[0].numberOfMovingStep))
                         current_object[0].numberOfMovingStep = 0
 
                         # free all occupy node
-                        for i in range(0, len(current_object[0].occupyEdge) - 1):
-                            value =  current_object[0].returnMapValue.pop(0)  # return back value
-                            game.adjacency_matrix[current_object[0].occupyEdge[i + 1]][
-                                current_object[0].occupyEdge[i]] = value
+                        print("this is current_object[0].occupyEdge")
+                        print(current_object[0].occupyEdge)
+                        for i in range(0, len(current_object[0].occupyEdge[:max_number_of_step]) - 1):
+                            print(i)
+                            value = current_object[0].returnMapValue.pop(0)  # return back value
                             game.adjacency_matrix[current_object[0].occupyEdge[i]][
                                 current_object[0].occupyEdge[i + 1]] = value
+                            print('{} to {} value {}'.format(current_object[0].occupyEdge[i], current_object[0].occupyEdge[i + 1], value))
+
+                            # game.adjacency_matrix[current_object[0].occupyEdge[i]][
+                            #     current_object[0].occupyEdge[i + 1]] = value
+                        for i in current_object[0].occupyNode:
+                            game.occupy_node[i] = False
                         current_object[0].free_occupy_node()
 
                         # version 1
                         dj = Dijkstra(game.adjacency_matrix, game.occupy_node)
                         dj.calculate()
 
+                        print("this is occupy_node")
+                        print(game.occupy_node)
+
+                        if current_object[0].initValue != current_object[1].initValue:
+                            next_path = dj.getBestPath(current_object[0].initValue, current_object[
+                                1].initValue)  # if path is null mean the task need put in the queue again
+
+                            if next_path != []:
+                                convert_path = game.map_path(next_path)
+                                current_object[2] = convert_path
+                                current_object[0].update_occupy_node(current_object[2][:max_number_of_step+1], game)
+                                # update data to map
+
+                                for i in range(0, len(current_object[0].occupyEdge[:max_number_of_step]) - 1):
+                                    game.adjacency_matrix[current_object[0].occupyEdge[i]][
+                                        current_object[0].occupyEdge[i + 1]] = 0  # zero mean no path
+                                    print("hello {} {}".format(current_object[0].occupyEdge[i],
+                                                               current_object[0].occupyEdge[i + 1]))
+
                         # version 2
                         # dj = DijkstraModify()
                         # dj.dijkstra(game.adjacency_matrix, current_object[0].initValue)
                         #
                         # # TODO: update new path
-                        next_path = []
-                        if current_object[0].initValue != current_object[1].initValue:
-                            print("This is bug {} {}".format(current_object[0].initValue, current_object[1].initValue))
-                            next_path = dj.getBestPath(current_object[0].initValue, current_object[1].initValue)
+                        # restart for current  robot
+                        # for vehicle_item_path in temp_path:
+                        #     next_path = []
+                        #     if vehicle_item_path[0].initValue != vehicle_item_path[1].initValue:
+                        #         print("This is bug {} {}".format(vehicle_item_path[0].initValue, vehicle_item_path[1].initValue))
+                        #         # next_path = dj.getBestPath(vehicle_item_path[0].initValue, vehicle_item_path[1].initValue)
+                        #
+                        #         next_path = dj.getBestPath(current_object[0].initValue, current_object[1].initValue)  # if path is null mean the task need put in the queue again
+                        #
+                        #         if next_path != []:
+                        #
+                        #
+                        #             vehicle_item_path[2] = game.map_path(next_path) #remember convert
+                        #
+                        #             vehicle_item_path[0].update_occupy_node(vehicle_item_path[2][:max_number_of_step])
+                        #             for i in range(0, len(vehicle_item_path[0].occupyEdge[:max_number_of_step]) - 1):
+                        #                 game.adjacency_matrix[vehicle_item_path[0].occupyEdge[i]][
+                        #                     vehicle_item_path[0].occupyEdge[i + 1]] = 0  # zero mean no path
+                        #                 # game.adjacency_matrix[vehicle_item_path[0].occupyEdge[i + 1]][
+                        #                 #     vehicle_item_path[0].occupyEdge[i]] = 0  # no bi direction
 
-                            # next_path = dj.getBestPath(current_object[0].initValue, current_object[1].initValue)  # if path is null mean the task need put in the queue again
+                        #             # vehicle_item_path[0].state = "Move"
+                        #         # else:
+                        #             # vehicle_item_path[0].state = "Stop"
 
-                            current_object[2] = game.map_path(next_path) #remember convert
+                        # if all vehicle is Stop, then random choice 1 move
+                        # if "Move" not in temp_path
+                        # count = 0
+                        # for number_vehicle in temp_path:
+                        #     if number_vehicle[0].state == "Stop":
+                        #         count += 1
+                        # print("This count {}".format(count))
+
+                        # if current_object[0].numberOfMovingStep >= max_number_of_step:
+
                         # TODO: update new path
-
 
                     # firebase.update_node_data(current_node)
 
+
         game.update()
-        game.draw_board()
+        game.draw_board()  # draw square and load cost on each path
         # loop for load all vehicle
         for i in range(0, numberOfVehicles):
             game.load_vehicles(vehicle1[i])
@@ -255,6 +342,8 @@ def main():
         # if hasItem:
         for i in range(0, numberOfItems):
             game.load_item(item[i])
+
+
         game.tick(FPS)
 
 
